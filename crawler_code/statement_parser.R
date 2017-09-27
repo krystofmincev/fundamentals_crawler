@@ -163,18 +163,28 @@ new_cik_index = c(new_cik_index, length(links) + 1)
 #ratios - save ratios in a file named [CIK]. 
 #UPDATE: do not merge or calculate ratios - simply save financial statements
 file_path = "/home/mincev/Documents/git/fundamentals_crawler/crawler_code/obj/"
+counter = 1
 for (i in 1:(length(new_cik_index)-1)){
   list_of_financial_statements = list()
   #list_of_merged_statements = list()
   cik_ids = list()
   for (j in new_cik_index[[i]][1]:(new_cik_index[[i + 1]][1]-1)){
-    statements = list(process_file(url_end = links[[j]][1]))
-    list_of_financial_statements = c(list_of_financial_statements, statements)
-    cik_ids = c(cik_ids, links[[j]][1])
-    #statements_merged = list(merge_statements(statements))
-    #list_of_merged_statements = c(list_of_merged_statements, statements_merged)
-    #ratios = merged_statement %>% finstr::calculate(calculations = ratios, digits = 3)
-      
+    tryCatch({
+      print("Retrieving data for: ")
+      print(links[[j]][1])
+      statements = list(process_file(url_end = links[[j]][1]))
+      list_of_financial_statements = c(list_of_financial_statements, statements)
+      cik_ids = c(cik_ids, links[[j]][1])
+      #statements_merged = list(merge_statements(statements))
+      #list_of_merged_statements = c(list_of_merged_statements, statements_merged)
+      #ratios = merged_statement %>% finstr::calculate(calculations = ratios, digits = 3)
+      counter = 1
+    },  error=function(e){
+      print("Unable to get data for:")
+      print(links[[j]][1])
+      Sys.sleep((counter * 5))
+      counter = counter + 1
+    })
     #save ratios to file 
     if (j == (new_cik_index[[i+1]][1]-1)){
       cik = substr(links[[j]][1], 22, 27)
